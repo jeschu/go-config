@@ -1,0 +1,96 @@
+= go-config
+
+Little go module to load and save config files located in `os.UserConfigDir()`.
+
+== Usage
+
+=== Installation
+
+`go get github.com/jeschu/go-config`
+
+
+=== Reading and writing a yaml config file
+[source,go]
+----
+import (
+	cfg "github.com/jeschu/go-config"
+)
+
+type Config struct {
+	Parameter string `yaml:"parameter"`
+}
+
+func main() {
+	config := Config{Parameter: "a value"}
+	if err := cfg.WriteConfigYaml("application/config.yaml", &config); err != nil {
+		panic(err)
+	}
+	if err := cfg.ReadConfigYaml("application/config.yaml", &config); err != nil {
+		panic(err)
+	}
+}
+
+----
+
+=== Reading and writing a json config file
+[source,go]
+----
+import (
+	cfg "github.com/jeschu/go-config"
+)
+
+type Config struct {
+	Parameter string `json:"parameter"`
+}
+
+func main() {
+	config := Config{Parameter: "a value"}
+	if err := cfg.WriteConfigJson("application/config.json", &config); err != nil {
+		panic(err)
+	}
+	if err := cfg.ReadConfigYaml("application/config.json", &config); err != nil {
+		panic(err)
+	}
+}
+----
+
+=== Reading and writing any config file
+[source,go]
+----
+import (
+	cfg "github.com/jeschu/go-config"
+	"github.com/pelletier/go-toml/v2"
+	"io"
+)
+
+type Config struct {
+	Parameter string `yaml:"parameter" json:"parameter"`
+}
+
+func main() {
+	var (
+		config = Config{Parameter: "a value"}
+		err    error
+	)
+	err = cfg.WriteConfig("application/config.yml", &config,
+		func(w io.Writer, source any) error {
+			return toml.NewEncoder(w).Encode(source)
+		},
+	)
+	if err != nil {
+		panic(err)
+	}
+	err = cfg.ReadConfig("application/config.yml", &config,
+		func(r io.Reader, target any) error {
+			return toml.NewDecoder(r).Decode(target)
+		})
+	if err != nil {
+		panic(err)
+	}
+}
+----
+
+include::RELEASE-NOTES.adoc[]
+
+== License
+include::LICENSE[]
