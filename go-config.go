@@ -1,3 +1,4 @@
+//go:generate building/generate-version.sh
 package go_config
 
 import (
@@ -11,13 +12,8 @@ import (
 type ConfigEncoder func(writer io.Writer, target any) error
 type ConfigDecoder func(reader io.Reader, target any) error
 
-func configPath(path string) (string, error) {
-	if configDir, err := os.UserConfigDir(); err != nil {
-		return "", err
-	} else {
-		return filepath.Join(configDir, path), nil
-	}
-}
+//goland:noinspection GoUnusedExportedFunction
+func GetInfo() Info { return getInfo() }
 
 func OpenConfig(path string, write bool) (f *os.File, closer func(), err error) {
 	closer = func() { /* nothing */ }
@@ -79,4 +75,12 @@ func WriteConfigYaml(path string, source any) (err error) {
 //goland:noinspection GoUnusedExportedFunction
 func WriteConfigJson(path string, source any) (err error) {
 	return WriteConfig(path, source, func(w io.Writer, source any) error { return json.NewEncoder(w).Encode(source) })
+}
+
+func configPath(path string) (string, error) {
+	if configDir, err := os.UserConfigDir(); err != nil {
+		return "", err
+	} else {
+		return filepath.Join(configDir, path), nil
+	}
 }
